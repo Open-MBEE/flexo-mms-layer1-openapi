@@ -1,0 +1,6 @@
+scripts:
+  build:json: mkdir -p build && deno run src/def.ts --format=json > build/spec.json
+  build:yaml: mkdir -p build && deno run src/def.ts --format=yaml > build/spec.yaml
+  build:
+    - vr build:json
+    - vr build:yaml

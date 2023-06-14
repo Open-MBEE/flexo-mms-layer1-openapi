@@ -1,0 +1,27 @@
+name: Build OpenAPI document
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Build document
+        run: |
+          mkdir -p build
+          deno run src/def.ts --format=json > build/spec.json
+          deno run src/def.ts --format=yaml > build/spec.yaml
+      - name: Commit
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@noreply.github.com"
+          git push origin --delete build/docs
+          git checkout -b build/docs
+          git add build/
+          git commit -m 'build: docs'
+          git push -u origin build/docs
