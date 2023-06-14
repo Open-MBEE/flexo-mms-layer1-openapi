@@ -1,0 +1,380 @@
+openapi: 3.1.0
+info:
+  title: MMS5 Layer 1 Service
+  description: OpenAPI specification for layer 1
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 1.0.0
+paths:
+  /login:
+    get:
+      operationId: login
+      summary: Login
+      description: Obtain a token from the auth service
+      tags:
+        - getting started
+      security:
+        - basicAuth: []
+      responses:
+        '200': {}
+  /orgs:
+    get:
+      operationId: readAllOrgs
+      summary: Read All Orgs
+      responses:
+        '200':
+          description: ''
+          content:
+            text/turtle:
+              schema:
+                type: string
+                example: |-
+                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+                  @prefix dct: <http://purl.org/dc/terms/> .
+                  @prefix mms: <https://mms.openmbee.org/rdf/ontology/> .
+                  @prefix m-org: <https://example.org/orgs/> .
+
+                  m-org:open-mbee rdf:type mms:Org ;
+                      mms:id "open-mbee" ;
+                      dct:title "Open-MBEE"@en ;
+                      mms:etag "495888f7-85b8-47c5-97a0-359b35ecd6a4" .
+
+                  m-org:other rdf:type mms:Org ;
+                      mms:id "other" ;
+                      dct:title "Some Other Org"@en ;
+                      mms:etag "bd4e72d1-0481-4eb8-b4ad-37078db4d30d" .
+        '400': &ref_0
+          description: Invalid input
+        '403': &ref_1
+          description: User not authorized
+        '404': &ref_2
+          description: Resource not found
+        '412': &ref_3
+          description: Precondition failed
+      tags:
+        - structural reads
+  '/orgs/{orgId}':
+    get:
+      operationId: readOrg
+      summary: Read Org
+      responses:
+        '200':
+          description: ''
+          content:
+            text/turtle:
+              schema:
+                type: string
+                example: |-
+                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+                  @prefix dct: <http://purl.org/dc/terms/> .
+                  @prefix mms: <https://mms.openmbee.org/rdf/ontology/> .
+                  @prefix m-org: <https://example.org/orgs/> .
+
+                  m-org:open-mbee rdf:type mms:Org ;
+                      mms:id "open-mbee" ;
+                      dct:title "Open-MBEE"@en ;
+                      mms:etag "495888f7-85b8-47c5-97a0-359b35ecd6a4" .
+        '400': *ref_0
+        '403': *ref_1
+        '404': *ref_2
+        '412': *ref_3
+      tags:
+        - structural reads
+    put:
+      operationId: createOrg
+      summary: Create Org
+      responses:
+        $ref: '#/components/responses/PutResource'
+      tags: &ref_4
+        - structural writes
+    patch:
+      operationId: updateOrg
+      summary: Update Org
+      responses:
+        $ref: '#/components/responses/PatchResource'
+      tags: *ref_4
+  '/orgs/{orgId}/repos':
+    get:
+      operationId: readAllRepos
+      summary: Read All Repos
+      responses:
+        '200':
+          description: ''
+          content:
+            text/turtle:
+              schema:
+                type: string
+                example: >-
+                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+                  @prefix dct: <http://purl.org/dc/terms/> .
+
+                  @prefix mms: <https://mms.openmbee.org/rdf/ontology/> .
+
+                  @prefix m-org: <https://example.org/orgs/> .
+
+
+                  <https://example.org/orgs/open-mbee/repos/tmt> rdf:type
+                  mms:Repo ;
+                      mms:id "tmt" ;
+                      mms:org m-org:open-mbee ;
+                      dct:title "Thirty Meter Telescope"@en ;
+                      mms:etag "12ceed0b-6b5a-438e-aaa1-bbb004e8ee87" .
+
+                  <https://example.org/orgs/other/repos/demo> rdf:type mms:Repo
+                  ;
+                      mms:id "demo" ;
+                      mms:org m-org:other ;
+                      dct:title "Demo Model"@en ;
+                      mms:etag "bbcff498-fa18-4551-9e76-f331e190324c" .
+        '400': *ref_0
+        '403': *ref_1
+        '404': *ref_2
+        '412': *ref_3
+      tags:
+        - structural reads
+  '/orgs/{orgId}/repos/{repoId}':
+    get:
+      operationId: readRepo
+      summary: Read Repo
+      responses:
+        '200':
+          description: ''
+          content:
+            text/turtle:
+              schema:
+                type: string
+                example: >-
+                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+                  @prefix dct: <http://purl.org/dc/terms/> .
+
+                  @prefix mms: <https://mms.openmbee.org/rdf/ontology/> .
+
+                  @prefix m-org: <https://example.org/orgs/> .
+
+
+                  <https://example.org/orgs/open-mbee/repos/tmt> rdf:type
+                  mms:Repo ;
+                      mms:id "tmt" ;
+                      mms:org m-org:open-mbee ;
+                      dct:title "Thirty Meter Telescope"@en ;
+                      mms:etag "12ceed0b-6b5a-438e-aaa1-bbb004e8ee87" .
+        '400': *ref_0
+        '403': *ref_1
+        '404': *ref_2
+        '412': *ref_3
+      tags:
+        - structural reads
+    put:
+      operationId: createRepo
+      summary: Create Repo
+      responses:
+        $ref: '#/components/responses/PutResource'
+      tags: &ref_5
+        - structural writes
+    patch:
+      operationId: updateRepo
+      summary: Update Repo
+      responses:
+        $ref: '#/components/responses/PatchResource'
+      tags: *ref_5
+  '/orgs/{orgId}/repos/{repoId}/branches':
+    get:
+      operationId: readAllBranches
+      summary: Read All Branches
+      responses:
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - structural reads
+  '/orgs/{orgId}/repos/{repoId}/branches/{branchId}':
+    get:
+      operationId: readBranch
+      summary: Read Branch
+      responses:
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - structural reads
+    put:
+      operationId: createBranch
+      summary: Create Branch
+      responses:
+        $ref: '#/components/responses/PutResource'
+      tags: &ref_6
+        - structural writes
+    patch:
+      operationId: updateBranch
+      summary: Update Branch
+      responses:
+        $ref: '#/components/responses/PatchResource'
+      tags: *ref_6
+  '/orgs/{orgId}/repos/{repoId}/branches/{branchId}/graph':
+    get:
+      operationId: readModel
+      summary: Read Model
+      responses:
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - structural reads
+    post:
+      operationId: loadModel
+      summary: Load Model
+      description: Replace the model at the HEAD of a branch by uploading an RDF file
+      requestBody: &ref_7
+        description: SPARQL 1.1 query string
+        required: true
+        content:
+          application/sparql-query: {}
+      responses: &ref_8
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - model commits
+  '/orgs/{orgId}/repos/{repoId}/branches/{branchId}/query':
+    post:
+      operationId: queryModel
+      summary: Query Model
+      description: Query the model at the HEAD of a branch
+      requestBody: *ref_7
+      responses: *ref_8
+      tags:
+        - model queries
+  '/orgs/{orgId}/repos/{repoId}/branches/{branchId}/update':
+    post:
+      operationId: commitModel
+      summary: Commit Model
+      description: Commit a change to the model by applying a SPARQL UPDATE
+      requestBody: &ref_9
+        description: SPARQL 1.1 update string
+        required: true
+        content:
+          application/sparql-update: {}
+      responses: &ref_10
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - model commits
+  '/orgs/{orgId}/repos/{repoId}/locks':
+    get:
+      operationId: readAllLocks
+      summary: Read All Locks
+      responses:
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - version control
+  '/orgs/{orgId}/repos/{repoId}/locks/{lockId}':
+    get:
+      operationId: readLock
+      summary: Read Lock
+      responses:
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - version control
+    put:
+      operationId: createLock
+      summary: Create Lock
+      requestBody: *ref_9
+      responses: *ref_10
+      tags:
+        - version control
+  '/orgs/{orgId}/repos/{repoId}/locks/{lockId}/query':
+    post:
+      operationId: queryLock
+      summary: Query Lock
+      description: Query the model under the commit pointed to by the given lock
+      requestBody: *ref_7
+      responses: *ref_8
+      tags:
+        - model queries
+  '/orgs/{orgId}/repos/{repoId}/diff':
+    post:
+      operationId: createDiff
+      summary: Create Diff
+      requestBody: *ref_7
+      responses: *ref_8
+      tags:
+        - version control
+  '/orgs/{orgId}/repos/{repoId}/diff/query':
+    post:
+      operationId: queryDiff
+      summary: Query Diff
+      description: Query the given diff
+      requestBody: *ref_7
+      responses: *ref_8
+      tags:
+        - version control
+  '/orgs/{orgId}/repos/{repoId}/query':
+    post:
+      operationId: queryRepo
+      summary: Query Repo
+      description: Query the metadata graph for the given repository
+      requestBody: *ref_7
+      responses: *ref_8
+      tags:
+        - version control
+  '/orgs/{orgId}/collections': {}
+  '/orgs/{orgId}/collections/{collectionId}':
+    put:
+      operationId: createCollection
+      summary: Create Collection
+      requestBody: &ref_11
+        description: RDF graph content as Turtle
+        required: true
+        content:
+          text/turtle: &ref_13
+            schema:
+              type: string
+              example: '@prefix : <https://ex.org/#> . :subject :predicate :object .'
+      responses: &ref_12
+        $ref: '#/components/responses/GetResource'
+      tags:
+        - structural writes
+  /policies: {}
+  '/policies/{policyId}':
+    put:
+      operationId: createPolicy
+      summary: Create Policy
+      requestBody: *ref_11
+      responses: *ref_12
+      tags:
+        - access control
+  /groups: {}
+  '/groups/{groupId}':
+    put:
+      operationId: createGroup
+      summary: Create Group
+      requestBody: *ref_11
+      responses: *ref_12
+      tags:
+        - access control
+components:
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Use a bearer token provided by the auth service at `/login`
+  responses:
+    HeadResource:
+      '200': {}
+      '400': *ref_0
+      '403': *ref_1
+      '404': *ref_2
+      '412': *ref_3
+    GetResource:
+      '200': &ref_14
+        content:
+          text/turtle: *ref_13
+      '400': *ref_0
+      '403': *ref_1
+      '404': *ref_2
+      '412': *ref_3
+    Turtle: *ref_14
+tags:
+  - name: getting started
+  - name: structural reads
+security:
+  - bearerAuth: []
+
