@@ -9,6 +9,11 @@ The generated OpenAPI document can in turn be used to generate API documentation
 The generated OpenAPI document is deployed as an HTML webpage using RapiDoc and GitHub pages.
 
 
+## View the OpenAPI Document
+
+If you just want to download the latest generated OpenAPI document, the files [can be found here](https://github.com/Open-MBEE/mms5-layer1-openapi/tree/build/docs/build).
+
+
 ## Building the OpenAPI Document
 
 See [scripts.yaml](./scripts.yaml) for instructions on how to build the OpenAPI document in JSON or YAML format.
