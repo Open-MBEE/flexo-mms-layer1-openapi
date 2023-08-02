@@ -18,6 +18,14 @@ If you just want to download the latest generated OpenAPI document, the files [c
 
 See [scripts.yaml](./scripts.yaml) for reference on how to build the OpenAPI document in JSON or YAML format from the CLI.
 
+
+## Generating Clients
+
+You can use the built OpenAPI document to generate a client in any target framework you like, using any client generator you like. [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator#1---installation) is one such tool, capable of generating clients in many different frameworks.
+
+
+## Build Tool
+
 [Velociraptor](https://velociraptor.run/) is a script runner tool for Deno that can be used to invoke the various commands in the `scripts.yaml` file:
  - `vr build` -- builds the OpenAPI document
  - `vr generate` -- generates client(s) using the built document
