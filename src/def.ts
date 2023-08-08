@@ -10,6 +10,47 @@ const h_flags = parse(Deno.args, {
 
 const si_format = h_flags.format;
 
+const H_PATH_PARAMS: Record<string, {
+	in: 'path';
+	required: boolean;
+	name: string
+	schema: {
+		type: 'string';
+	};
+}> = Object.entries({
+	orgId: {
+		description: 'Organization ID',
+	},
+	repoId: {
+		description: 'Repository ID',
+	},
+	branchId: {
+		description: 'Branch ID',
+	},
+	lockId: {
+		description: 'Lock ID',
+	},
+	collectionId: {
+		description: 'Collection ID',
+	},
+	policyId: {
+		description: 'Policy ID',
+	},
+	groupId: {
+		description: 'Group ID',
+	},
+}).reduce((h_out, [si_key, h_spec]) => ({
+	...h_out,
+	[si_key]: {
+		name: si_key,
+		in: 'path',
+		required: true,
+		schema: {
+			type: 'string',
+		},
+		...h_spec,
+	},
+}), {});
 
 const H_RESPONSE_CODES = {
 	400: {
@@ -55,6 +96,7 @@ const H_CONTENT_SPARQL_UPDATE = {
 };
 
 const G_RESPONSE_GRAPH = {
+	description: '',
 	content: {
 		...H_CONTENT_TURTLE,
 	},
@@ -145,6 +187,27 @@ const ttl_example = (sx_ttl: string) => ({
 	},
 });
 
+const g_responses = {
+	HeadResource: {
+		200: {
+			description: '',
+		},
+		...H_RESPONSE_CODES,
+	},
+	GetResource: {
+		200: G_RESPONSE_GRAPH,
+		...H_RESPONSE_CODES,
+	},
+	PutResource: {
+		200: G_RESPONSE_GRAPH,
+		...H_RESPONSE_CODES,
+	},
+	PatchResource: {
+		200: G_RESPONSE_GRAPH,
+		...H_RESPONSE_CODES,
+	},
+};
+
 const g_components = {
 	securitySchemes: {
 		basic: {
@@ -159,15 +222,14 @@ const g_components = {
 		},
 	},
 	responses: {
-		HeadResource: {
-			200: {},
-			...H_RESPONSE_CODES,
-		},
-		GetResource: {
-			200: G_RESPONSE_GRAPH,
-			...H_RESPONSE_CODES,
-		},
 		Turtle: G_RESPONSE_GRAPH,
+		...Object.entries(g_responses).reduce((h_out: Record<string, object>, [si_method, h_codes]) => {
+			for(const si_code in h_codes) {
+				h_out[`${si_method}_${si_code}`] = h_codes[si_code as unknown as keyof typeof h_codes];
+			}
+
+			return h_out;
+		}, {}),
 	},
 };
 
@@ -188,7 +250,7 @@ const head_get = (si_operation: string, a_tags?: string[], sx_ttl?: string) => (
 	get: {
 		...naturally(si_operation),
 		responses: {
-			$ref: '#/components/responses/GetResource',
+			...g_responses.GetResource,
 		},
 		...a_tags? {tags:a_tags}: {},
 		...sx_ttl? ttl_example(sx_ttl): {},
@@ -199,14 +261,14 @@ const put_patch = (si_base: string, a_tags?: string[]) => ({
 	put: {
 		...naturally(`create${si_base}`),
 		responses: {
-			$ref: '#/components/responses/PutResource',
+			...g_responses.GetResource,
 		},
 		...a_tags? {tags:a_tags}: {},
 	},
 	patch: {
 		...naturally(`update${si_base}`),
 		responses: {
-			$ref: '#/components/responses/PatchResource',
+			...g_responses.PatchResource,
 		},
 		...a_tags? {tags:a_tags}: {},
 	},
@@ -215,19 +277,17 @@ const put_patch = (si_base: string, a_tags?: string[]) => ({
 const crud = (si_base: string, sx_ttl?: string) => ({
 	...head_get('read'+si_base, [SI_TAG_STRUCTURAL_READS], sx_ttl),
 	...put_patch(si_base, [SI_TAG_STRUCTURAL_WRITES]),
-})
+});
 
 const g_sparql_query = {
 	requestBody: {
 		description: 'SPARQL 1.1 query string',
 		required: true,
-		content: {
-			'application/sparql-query': {},
-		},
+		content: H_CONTENT_SPARQL_QUERY,
 	},
 
 	responses: {
-		$ref: '#/components/responses/GetResource',
+		...g_responses.GetResource,
 	},
 };
 
@@ -235,13 +295,11 @@ const g_sparql_update = {
 	requestBody: {
 		description: 'SPARQL 1.1 update string',
 		required: true,
-		content: {
-			'application/sparql-update': {},
-		},
+		content: H_CONTENT_SPARQL_UPDATE,
 	},
 
 	responses: {
-		$ref: '#/components/responses/GetResource',
+		...g_responses.GetResource,
 	},
 };
 
@@ -255,7 +313,7 @@ const g_rdf_turtle = {
 	},
 
 	responses: {
-		$ref: '#/components/responses/GetResource',
+		...g_responses.GetResource,
 	},
 };
 
@@ -272,7 +330,9 @@ const h_paths = {
 				},
 			],
 			responses: {
-				200: {},
+				200: {
+					description: '',
+				},
 			},
 		},
 	},
@@ -436,6 +496,22 @@ function flatten_paths(h_paths_nested, h_root={}, s_path='') {
 	return s_path? h_out: h_root;
 }
 
+function auto_parameterize(h_paths) {
+	for(const si_path in h_paths) {
+		const a_params = [];
+		for(const [, si_param] of si_path.matchAll(/\{(\w+)\}/g)) {
+			a_params.push(H_PATH_PARAMS[si_param]);
+		}
+
+		const h_ops = h_paths[si_path];
+		for(const si_op in h_ops) {
+			h_ops[si_op].parameters = [...a_params];
+		}
+	}
+
+	return h_paths;
+}
+
 const g_spec = {
 	openapi: '3.1.0',
 	info: {
@@ -443,11 +519,12 @@ const g_spec = {
 		description: 'OpenAPI specification for layer 1',
 		license: {
 			name: 'Apache 2.0',
+			identifier: 'Apache-2.0',
 			url: 'https://www.apache.org/licenses/LICENSE-2.0.html',
 		},
 		version: '1.0.0',
 	},
-	paths: flatten_paths(h_paths),
+	paths: auto_parameterize(flatten_paths(h_paths)),
 	components: g_components,
 	tags: [
 		{

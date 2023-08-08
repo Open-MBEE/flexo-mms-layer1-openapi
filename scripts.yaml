@@ -4,3 +4,10 @@ scripts:
   build:
     - vr build:json
     - vr build:yaml
+  generate:python: cd build && openapi-generator generate -i spec.yaml -g python -o python
+  generate:typescript: cd build && openapi-generator generate -i spec.yaml -g typescript -o typescript
+  generate:
+    - vr generate:python
+    - vr generate:typescript
+  all:
+    - vr build && vr generate
